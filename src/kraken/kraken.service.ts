@@ -1,31 +1,36 @@
-import { Injectable, Scope } from '@nestjs/common';
-import { CreateKrakenDto } from './dto/create-kraken.dto';
-import { UpdateKrakenDto } from './dto/update-kraken.dto';
+import { Injectable, Scope } from '@nestjs/common'
+import { CreateKrakenDto } from './dto/create-kraken.dto'
+import { UpdateKrakenDto } from './dto/update-kraken.dto'
 
-const ccxt = require('ccxt');
+import { KrakenPublicSocket } from './ws/public'
 
-@Injectable({ scope: Scope.REQUEST })
+const KrakenClient = require('kraken-api')
+@Injectable()
 export class KrakenService {
-  private readonly api: any = new ccxt.kraken();
+  private kraken: any = new KrakenClient()
+  private socket: any = null
+  private pairs: string[]
 
-  create(createKrakenDto: CreateKrakenDto) {
-    return 'This action adds a new kraken';
+  constructor() {
+    this.initialize()
   }
 
-  findAll(): string {
-    console.log(this.api);
-    return `This action returns all kraken`;
+  async initialize() {
+    this.pairs = await this.fetchPairs()
+    this.socket = new KrakenPublicSocket(this.pairs)
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} kraken`;
+  async fetchPairs() {
+    const response = await this.kraken.api('AssetPairs')
+    return Object.values(response.result)
+      .map((pair: any): string => pair.wsname)
+      .filter((pair: string): boolean => !!pair)
   }
 
-  update(id: number, updateKrakenDto: UpdateKrakenDto) {
-    return `This action updates a #${id} kraken`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} kraken`;
+  async getSocketToken() {
+    return {
+      token: await this.kraken.GetWebSocketsToken(),
+      expire: 15 * 60 * 1000
+    }
   }
 }
