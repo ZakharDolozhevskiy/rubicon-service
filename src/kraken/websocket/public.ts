@@ -10,6 +10,8 @@ export class KrakenPublicSocket {
   private readonly URL_DEV_AUTH = 'wss://beta-ws-auth.kraken.com'
   private readonly URL_PROD_AUTH = 'wss://ws-auth.kraken.com'
 
+  private listeners = []
+
   constructor(private pairs: string[], private token?: string) {
     this.socket = new WebSocket(this.URL_DEV)
     this.socket.on('open', this.onOpen.bind(this))
@@ -20,8 +22,8 @@ export class KrakenPublicSocket {
 
   private onOpen() {
     this.subscribeForPrice('trade')
-    this.subscribeForPrice('spread')
-    this.subscribeForPrice('ticker')
+    //this.subscribeForPrice('spread')
+    //this.subscribeForPrice('ticker')
   }
 
   private subscribeForPrice(method: string) {
@@ -43,8 +45,8 @@ export class KrakenPublicSocket {
       console.error('Failed to parse message payload')
     }
 
-    if (payload) {
-      console.log(payload)
+    if (Array.isArray(payload)) {
+      this.listeners.forEach((callback) => callback(payload))
     }
   }
 
@@ -54,5 +56,9 @@ export class KrakenPublicSocket {
 
   private onClose(event) {
     console.info(event)
+  }
+
+  public subscribe(event, callback, options) {
+    this.listeners.push(callback)
   }
 }
