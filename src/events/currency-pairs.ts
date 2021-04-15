@@ -1,4 +1,4 @@
-export class PairPriceChangeEvent {
+export class PriceChangeEvent {
   public provider: string
   public price: number
   public pair: string

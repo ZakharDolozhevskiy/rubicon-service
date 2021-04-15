@@ -1,5 +1,12 @@
 const WebSocket = require('ws')
 
+export enum Events {
+  trade = 'trade',
+  spread = 'spread',
+  ticker = 'ticker',
+  book = 'book'
+}
+
 export class KrakenPublicSocket {
   private socket: any
   private socketAuth: any
@@ -10,33 +17,25 @@ export class KrakenPublicSocket {
   private readonly URL_DEV_AUTH = 'wss://beta-ws-auth.kraken.com'
   private readonly URL_PROD_AUTH = 'wss://ws-auth.kraken.com'
 
-  private listeners = []
+  // for all event types refer to: https://docs.kraken.com/websockets/#message-subscribe
+  private handlers = {
+    [Events.trade]: [],
+    [Events.spread]: [],
+    [Events.ticker]: [],
+    [Events.book]: []
+  }
+
+  private onceOpen: any
 
   constructor(private pairs: string[], private token?: string) {
     this.socket = new WebSocket(this.URL_DEV)
-    this.socket.on('open', this.onOpen.bind(this))
     this.socket.on('error', this.onError.bind(this))
     this.socket.on('close', this.onClose.bind(this))
     this.socket.on('message', this.onMessage.bind(this))
+    this.onceOpen = new Promise((resolve) => this.socket.on('open', resolve))
   }
 
-  private onOpen() {
-    this.subscribeForPrice('trade')
-    //this.subscribeForPrice('spread')
-    //this.subscribeForPrice('ticker')
-  }
-
-  private subscribeForPrice(method: string) {
-    this.socket.send(
-      JSON.stringify({
-        event: 'subscribe',
-        pair: ['ETH/USD'] || this.pairs,
-        subscription: { name: method }
-      })
-    )
-  }
-
-  private onMessage(message) {
+  private onMessage(message, ...rest) {
     let payload = null
 
     try {
@@ -46,7 +45,9 @@ export class KrakenPublicSocket {
     }
 
     if (Array.isArray(payload)) {
-      this.listeners.forEach((callback) => callback(payload))
+      let event = payload[payload.length - 2]
+      let handlers = this.handlers[event] || []
+      handlers.forEach((handler) => handler(payload))
     }
   }
 
@@ -58,7 +59,22 @@ export class KrakenPublicSocket {
     console.info(event)
   }
 
-  public subscribe(event, callback, options) {
-    this.listeners.push(callback)
+  private subscription(options) {
+    this.socket.send(
+      JSON.stringify({
+        event: 'subscribe',
+        pair: ['ETH/USD'], // this.pairs
+        subscription: options
+      })
+    )
+  }
+
+  public subscribe(eventHandlers) {
+    this.onceOpen.then(() =>
+      Object.entries(eventHandlers).forEach(([event, handler]: [Events, (e: any) => void]) => {
+        this.handlers[event] && this.handlers[event].push(handler)
+        this.handlers[event].length === 1 && this.subscription({ name: event })
+      })
+    )
   }
 }
