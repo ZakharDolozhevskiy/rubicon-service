@@ -1,37 +1,21 @@
 import { EventEmitter2 } from '@nestjs/event-emitter'
-import { Injectable, Scope } from '@nestjs/common'
+import { Injectable, Scope, Inject } from '@nestjs/common'
 import { KrakenPublicSocket, Events } from './websocket/public'
 import { PriceChangeEvent } from '../events/currency-pairs'
+import { KRAKEN_CLIENT, KRAKEN_PAIRS } from './common/constants'
 
 const KrakenClient = require('kraken-api')
 @Injectable()
 export class KrakenService {
-  private kraken: any = new KrakenClient()
   private socket: any = null
-  private pairs: string[]
 
-  constructor(private eventEmitter: EventEmitter2) {
-    this.initialize()
-  }
-
-  async initialize() {
-    this.pairs = await this.fetchPairs()
+  constructor(
+    @Inject(KRAKEN_CLIENT) private client,
+    @Inject(KRAKEN_PAIRS) private pairs,
+    private eventEmitter: EventEmitter2
+  ) {
     this.socket = new KrakenPublicSocket(this.pairs)
     this.socket.subscribe({ [Events.trade]: this.onPriceChange.bind(this) })
-  }
-
-  private async fetchPairs() {
-    const response = await this.kraken.api('AssetPairs')
-    return Object.values(response.result)
-      .map((pair: any): string => pair.wsname)
-      .filter((pair: string): boolean => !!pair)
-  }
-
-  private async getSocketToken() {
-    return {
-      token: await this.kraken.GetWebSocketsToken(),
-      expire: 15 * 60 * 1000
-    }
   }
 
   private onPriceChange(event) {

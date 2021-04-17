@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Put, Param, Delete } from "@nestjs/common"
+import { Controller, Get, Post, Body, Put, Param, Delete, Inject } from "@nestjs/common"
 import { CreateOrderDto, UpdateOrderDto } from './dto';
+import { KRAKEN_PAIRS } from './common/constants'
 
 @Controller('kraken')
 export class KrakenController {
+    constructor(@Inject(KRAKEN_PAIRS) private pairs) {}
+
     @Get('pairs')
     getSupportedPairs() {
-
+        return this.pairs
     }
 
     @Get('orders')

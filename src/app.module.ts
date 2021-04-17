@@ -5,6 +5,9 @@ import { KrakenModule } from './kraken/kraken.module'
 import { OrderModule } from './order/order.module'
 
 @Module({
-  imports: [KrakenModule, OrderModule, EventEmitterModule.forRoot()]
+  imports: [
+    OrderModule,
+    KrakenModule.register(),
+    EventEmitterModule.forRoot()]
 })
 export class AppModule {}
