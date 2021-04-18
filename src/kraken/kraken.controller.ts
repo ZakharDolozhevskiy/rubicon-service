@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Inject } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from "@nestjs/common"
 import { CreateOrderDto, UpdateOrderDto } from './dto';
 import { KRAKEN_PAIRS } from './common/constants'
 
@@ -21,7 +21,7 @@ export class KrakenController {
 
     }
 
-    @Put('order/:id')
+    @Patch('order/:id')
     updateOrder(@Param('id') id: string, @Body() order: UpdateOrderDto) {
 
     }
