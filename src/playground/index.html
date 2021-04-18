@@ -5,19 +5,21 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Playground</title>
-  <script src="socket.io.js"></script>
+</head>
+<body>
+  <h5>Events:</h5>
+  <ui id="container"></ui>
+</body>
+<script src="./socket.io.js"></script>
   <script>
     const socket = io('http://localhost:8080');
     socket.on('connect', function() {
       console.log('Connected');
-
-      socket.emit('events', { test: 'test' });
-      socket.emit('identity', 0, response =>
-        console.log('Identity:', response),
-      );
     });
-    socket.on('events', function(data) {
-      console.log('event', data);
+    socket.on('pair.price.change', function(data) {
+      const li = document.createElement('li')
+      li.innerHTML = JSON.stringify(data)
+      window.container.appendChild(li)
     });
     socket.on('exception', function(data) {
       console.log('event', data);
@@ -26,8 +28,4 @@
       console.log('Disconnected');
     });
   </script>
-</head>
-<body>
-
-</body>
 </html>

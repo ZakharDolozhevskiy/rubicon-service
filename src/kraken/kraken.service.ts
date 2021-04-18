@@ -1,14 +1,14 @@
 import { EventEmitter2 } from '@nestjs/event-emitter'
-import { SocketGateway } from '../gateway/gateway.service'
 import { Injectable, Scope, Inject } from '@nestjs/common'
+import { SocketGateway } from '../gateway/gateway.service'
+import { PRICE_CHANGE_EVENT, IPriceChangeEvent } from '../events/price.change'
 import { KrakenPublicSocket, Events } from './websocket/public'
-import { PriceChangeEvent } from '../events/currency-pairs'
 import { KRAKEN_CLIENT, KRAKEN_PAIRS } from './common/constants'
 
-const EventEmitter = require('events')
 const KrakenClient = require('kraken-api')
+
 @Injectable()
-export class KrakenService extends EventEmitter {
+export class KrakenService {
   private socket: KrakenPublicSocket = null
 
   constructor(
@@ -17,15 +17,14 @@ export class KrakenService extends EventEmitter {
     @Inject(KRAKEN_CLIENT) private client,
     @Inject(KRAKEN_PAIRS) private pairs
   ) {
-    super()
     this.socket = new KrakenPublicSocket(this.pairs)
     this.socket.subscribe({ [Events.trade]: this.onPriceChange.bind(this) })
   }
 
-  private onPriceChange(event) {
-    const ev = new PriceChangeEvent({ pair: event[3], provider: 'kraken', price: Number(event[1][0][0]) })
-    this.eventEmitter.emit('pair.price.change', ev)
-    this.emit('pair.price.change', ev)
+  private onPriceChange(data) {
+    const event: IPriceChangeEvent = { pair: data[3], provider: 'kraken', price: Number(data[1][0][0]) }
+    this.eventEmitter.emit(PRICE_CHANGE_EVENT, event)
+    this.socketGateway.emit(PRICE_CHANGE_EVENT, event)
   }
 
   public resolveOrder() {}

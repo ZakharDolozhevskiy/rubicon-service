@@ -7,14 +7,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
 
   handleConnection(client: Socket) {
-    console.log('new connection', client);
+    console.log('new connection')
   }
 
   handleDisconnect(client: Socket) {
-    console.log('client disconnect', client);
+    console.log('client disconnect')
   }
 
   public emit(event, details) {
-
+    this.server.emit(event, details)
   }
 }

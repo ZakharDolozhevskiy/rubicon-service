@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
-import { PriceChangeEvent } from '../events/currency-pairs'
+import { PRICE_CHANGE_EVENT, IPriceChangeEvent } from '../events/price.change'
 
 @Injectable()
 export class OrderService {
   constructor(private eventEmitter: EventEmitter2) {}
 
-  @OnEvent('pair.price.change')
-  handlePairPriceChange(payload: PriceChangeEvent) {
-    console.log(payload, 'pair.price.change')
+  @OnEvent(PRICE_CHANGE_EVENT)
+  handlePairPriceChange(event: IPriceChangeEvent) {
+    //console.log(event, 'pair.price.change')
   }
 }
