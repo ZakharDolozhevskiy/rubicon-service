@@ -14,9 +14,15 @@
   <script>
     const socket = io('http://localhost:8080');
     socket.on('connect', function() {
-      console.log('Connected');
+      socket.emit('subscribe', 'price.change:kraken:ETH/USD')
+      socket.emit('subscribe', 'price.change:kraken')
     });
-    socket.on('pair.price.change', function(data) {
+    socket.on('price.change:kraken:ETH/USD', function(data) {
+      const li = document.createElement('li')
+      li.innerHTML = JSON.stringify(data)
+      window.container.appendChild(li)
+    });
+    socket.on('price.change:kraken', function(data) {
       const li = document.createElement('li')
       li.innerHTML = JSON.stringify(data)
       window.container.appendChild(li)

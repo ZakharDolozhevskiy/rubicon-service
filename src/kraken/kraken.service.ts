@@ -22,9 +22,14 @@ export class KrakenService {
   }
 
   private onPriceChange(data) {
-    const event: IPriceChangeEvent = { pair: data[3], provider: 'kraken', price: Number(data[1][0][0]) }
-    this.eventEmitter.emit(PRICE_CHANGE_EVENT, event)
-    this.socketGateway.emit(PRICE_CHANGE_EVENT, event)
+    const pair = data[3]
+    const price = Number(data[1][0][0])
+    const provider = 'kraken'
+
+    this.eventEmitter.emit(PRICE_CHANGE_EVENT, { pair, provider, price })
+
+    this.socketGateway.emit(`${PRICE_CHANGE_EVENT}:${provider}`, { price, pair })
+    this.socketGateway.emit(`${PRICE_CHANGE_EVENT}:${provider}:${pair}`, { price })
   }
 
   public resolveOrder() {}

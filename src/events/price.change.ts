@@ -1,4 +1,4 @@
-export const PRICE_CHANGE_EVENT = 'pair.price.change'
+export const PRICE_CHANGE_EVENT = 'price.change'
 
 export interface IPriceChangeEvent {
   provider: string,
