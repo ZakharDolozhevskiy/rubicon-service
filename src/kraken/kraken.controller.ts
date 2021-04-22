@@ -1,38 +1,51 @@
+import { Connection } from 'typeorm';
 import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from "@nestjs/common"
-import { CreateOrderDto, UpdateOrderDto } from './dto';
-import { KRAKEN_PAIRS } from './common/constants'
+import { OrderService } from '../orders/order.service'
+import { KRAKEN_PAIRS, VENDOR_NAME } from './utils/constants'
+import { CreateOrderDto } from './dto/create.order.dto'
+import { KUpdateOrderDto } from './dto/update.order.dto'
 
 @Controller('kraken')
 export class KrakenController {
-    constructor(@Inject(KRAKEN_PAIRS) private pairs) {}
+    @Inject(KRAKEN_PAIRS)
+    private readonly pairs
+
+    @Inject(OrderService)
+    private orderService
 
     @Get('pairs')
-    getSupportedPairs() {
+    getPairs() {
         return this.pairs
     }
 
     @Get('orders')
-    getActiveOrders() {
-
+    readAll() {
+        return this.orderService.search({ vendor: VENDOR_NAME })
     }
 
     @Get('order/:id')
-    getActiveOrder(@Param('id') id: string) {
-
-    }
-
-    @Patch('order/:id')
-    updateOrder(@Param('id') id: string, @Body() order: UpdateOrderDto) {
-
+    readOne(@Param('id') id: number) {
+        return this.orderService.search({ id, provider: VENDOR_NAME })
     }
 
     @Post('order')
-    createOrder(@Body() order: CreateOrderDto) {
+    create(@Body() order: CreateOrderDto) {
+        return this.orderService.create({
+            vendor: VENDOR_NAME,
+            ...order
+        })
+    }
 
+    @Patch('order/:id')
+    update(
+        @Param('id') id: string,
+        @Body() { target, amount }: UpdateOrderDto
+    ) {
+        return this.orderService.update(id, { target, amount })
     }
 
     @Delete('order/:id')
-    cancelOrder(@Param('id') id: string) {
-
+    delete(@Param('id') id: string) {
+        return this.orderService.delete(id)
     }
 }
