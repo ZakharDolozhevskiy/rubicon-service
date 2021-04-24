@@ -1,29 +1,34 @@
-import { join } from 'path';
+import { join } from 'path'
 import { Module } from '@nestjs/common'
-import { EventEmitterModule } from '@nestjs/event-emitter'
+import { ConfigModule } from '@nestjs/config'
+import { TypeOrmModule } from '@nestjs/typeorm'
 import { ServeStaticModule } from '@nestjs/serve-static'
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { EventEmitterModule } from '@nestjs/event-emitter'
+
 import { SocketGatewayModule } from './gateway/gateway.module'
 import { KrakenModule } from './kraken/kraken.module'
 import { OrderModule } from './orders/order.module'
+import { OrderEntity } from './orders/order.entity'
 
 @Module({
   imports: [
-    OrderModule,
-    SocketGatewayModule,
-    KrakenModule.register(),
+    ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
+    KrakenModule.register(),
+    // dev only playground
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '../src', 'playground') }),
-    // TODO: dotenv
+    // websocket interface
+    SocketGatewayModule,
+    // postgres database
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'ec2-52-209-134-160.eu-west-1.compute.amazonaws.com',
-      port: 5432,
-      username: 'xnkjberjwjhrjm',
-      password: 'bc5fbc373dcf5dafccd4ab8006edbde80a6dbc5e970a5a60669572b0707b936c',
-      database: 'd8vkeaj9tc4g8t',
-      entities: [],
-    }),
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_KEY,
+      entities: [OrderEntity],
+    })
   ]
 })
 export class AppModule {}

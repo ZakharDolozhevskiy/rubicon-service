@@ -1,9 +1,9 @@
 import { Connection } from 'typeorm';
 import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from "@nestjs/common"
 import { OrderService } from '../orders/order.service'
-import { KRAKEN_PAIRS, VENDOR_NAME } from './utils/constants'
+import { KRAKEN_PAIRS, VENDOR_NAME } from './common/constants'
 import { CreateOrderDto } from './dto/create.order.dto'
-import { KUpdateOrderDto } from './dto/update.order.dto'
+import { UpdateOrderDto } from './dto/update.order.dto'
 
 @Controller('kraken')
 export class KrakenController {

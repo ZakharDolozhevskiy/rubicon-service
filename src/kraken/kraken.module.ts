@@ -2,8 +2,9 @@ import { Module, DynamicModule } from '@nestjs/common'
 import { KrakenService } from './kraken.service'
 import { KrakenController } from './kraken.controller'
 import { KrakenPublicSocket, Events } from './websocket/public'
-import { KRAKEN_CLIENT, KRAKEN_PAIRS } from './utils/constants'
-import { extractPairs } from './utils/mappers'
+import { KRAKEN_CLIENT, KRAKEN_PAIRS } from './common/constants'
+import { extractPairs } from './common/mappers'
+import { OrderModule } from '../orders/order.module'
 
 const KrakenClient = require('kraken-api')
 
@@ -27,6 +28,9 @@ export class KrakenModule {
           useValue: await (['ETH/USD'] || client.api('AssetPairs').then(extractPairs))
         },
         KrakenService
+      ],
+      imports: [
+        OrderModule
       ]
     }
   }

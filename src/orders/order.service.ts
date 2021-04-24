@@ -1,15 +1,16 @@
+import { Repository } from 'typeorm'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { OrderEntity } from './order.entity'
-import { IOrder } from './order.entity'
+import { IOrder } from './order.interface'
 
 import { PRICE_CHANGE_EVENT, IPriceChangeEvent } from '../events/price.change'
 
 @Injectable()
 export class OrderService {
   constructor(
-    @InjectRepository(Order)
+    @InjectRepository(OrderEntity)
     private ordersRepository: Repository<OrderEntity>,
     private eventEmitter: EventEmitter2
   ) {}
