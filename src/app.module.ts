@@ -14,7 +14,6 @@ import { OrderEntity } from './orders/order.entity'
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
-    KrakenModule.register(),
     // dev only playground
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '../src', 'playground') }),
     // websocket interface
@@ -27,8 +26,10 @@ import { OrderEntity } from './orders/order.entity'
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_KEY,
-      entities: [OrderEntity],
-    })
+      autoLoadEntities: true
+    }),
+    OrderModule,
+    KrakenModule.register()
   ]
 })
 export class AppModule {}

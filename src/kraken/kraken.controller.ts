@@ -14,38 +14,40 @@ export class KrakenController {
     private orderService
 
     @Get('pairs')
-    getPairs() {
+    async getPairs() {
         return this.pairs
     }
 
     @Get('orders')
-    readAll() {
+    async readAll() {
         return this.orderService.search({ vendor: VENDOR_NAME })
     }
 
     @Get('order/:id')
-    readOne(@Param('id') id: number) {
-        return this.orderService.search({ id, provider: VENDOR_NAME })
+    async readOne(@Param('id') id: number) {
+        const result = await this.orderService.search({ id, vendor: VENDOR_NAME })
+        return result[0]
     }
 
     @Post('order')
-    create(@Body() order: CreateOrderDto) {
-        return this.orderService.create({
-            vendor: VENDOR_NAME,
-            ...order
-        })
+    async create(@Body() order: CreateOrderDto) {
+        // TODO: input validation
+        // TODO: provide username from auth session
+        return this.orderService.create({ ...order, vendor: VENDOR_NAME, user: 'default' })
     }
 
     @Patch('order/:id')
-    update(
+    async update(
         @Param('id') id: string,
         @Body() { target, amount }: UpdateOrderDto
     ) {
+        // TODO: input validation
         return this.orderService.update(id, { target, amount })
     }
 
     @Delete('order/:id')
-    delete(@Param('id') id: string) {
-        return this.orderService.delete(id)
+    async delete(@Param('id') id: string) {
+        await this.orderService.delete(id)
+        return { id }
     }
 }
