@@ -6,19 +6,19 @@ export class OrderEntity {
   id: number
 
   @Column()
-  user: string
+  type: string
+
+  @Column()
+  username: string
 
   @Column()
   target: number
 
   @Column()
-  price: number
-
-  @Column()
   amount: number
 
   @Column()
-  pair: string
+  currency: string
 
   @Column()
   vendor: string

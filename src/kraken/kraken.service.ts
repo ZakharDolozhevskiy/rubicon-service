@@ -3,7 +3,7 @@ import { Injectable, Scope, Inject } from '@nestjs/common'
 import { SocketGateway } from '../gateway/gateway.service'
 import { PRICE_CHANGE_EVENT, IPriceChangeEvent } from '../events/price.change'
 import { KrakenPublicSocket, Events } from './websocket/public'
-import { KRAKEN_CLIENT, KRAKEN_PAIRS } from './common/constants'
+import { KRAKEN_CLIENT, KRAKEN_PAIRS } from './utils/constants'
 
 const KrakenClient = require('kraken-api')
 

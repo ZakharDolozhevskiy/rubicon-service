@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm'
-import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm'
+import { Injectable, HttpStatus, HttpException } from '@nestjs/common'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { OrderEntity } from './order.entity'
 import { IOrder } from './order.interface'
@@ -17,12 +17,19 @@ export class OrderService {
   ) {}
 
   public async create(payload: IOrder): Promise<OrderEntity> {
-    return this.repository.save(payload)
+    return this.repository.save({
+      // TODO: provide username from auth session
+      username: 'default',
+      ...payload
+    })
   }
 
-  public async update(id: number, payload: Partial<IOrder>): Promise<OrderEntity> {
+  public async update(id: number, payload: Partial<IOrder>): Promise<OrderEntity | HttpException> {
     const order = await this.repository.findOne({ id })
-    return this.repository.save({ ...order, ...payload })
+
+    return order
+      ? this.repository.save({ ...order, ...payload })
+      : new HttpException({ error: 'no such order' }, HttpStatus.BAD_REQUEST)
   }
 
   public delete(id: number) {

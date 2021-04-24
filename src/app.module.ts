@@ -26,7 +26,8 @@ import { OrderEntity } from './orders/order.entity'
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_KEY,
-      autoLoadEntities: true
+      autoLoadEntities: true,
+      synchronize: true
     }),
     OrderModule,
     KrakenModule.register()

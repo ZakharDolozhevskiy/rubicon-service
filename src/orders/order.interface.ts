@@ -1,5 +1,5 @@
 export interface IOrder {
-  price: number
+  type: string;
   amount: number
   target: number
   provider: string

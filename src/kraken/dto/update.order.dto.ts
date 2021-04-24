@@ -1,7 +1,13 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateOrderDto } from './create.order.dto';
+import { IsOptional, IsPositive, IsInt } from 'class-validator'
 
 export class UpdateOrderDto {
+    @IsPositive()
+    @IsInt()
+    @IsOptional()
     amount: number
+
+    @IsPositive()
+    @IsInt()
+    @IsOptional()
     target: number
 }

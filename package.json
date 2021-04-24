@@ -32,6 +32,8 @@
     "@nestjs/typeorm": "^7.1.5",
     "@nestjs/websockets": "^7.6.15",
     "ccxt": "^1.41.2",
+    "class-transformer": "^0.4.0",
+    "class-validator": "^0.13.1",
     "kraken-api": "^1.0.1",
     "pg": "^8.6.0",
     "reflect-metadata": "^0.1.13",
