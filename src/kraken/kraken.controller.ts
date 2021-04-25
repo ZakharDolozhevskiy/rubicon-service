@@ -44,13 +44,11 @@ export class KrakenController {
     @Patch('order/:id')
     async update(
         @Param() params: OrderParams,
-        @Body() { target, amount }: UpdateOrderDto
+        @Body() payload: UpdateOrderDto
     ) {
-        if (target || amount) {
-            const changes: Partial<UpdateOrderDto> = {}
-            amount && (changes.amount = amount)
-            target && (changes.target = target)
-            return this.orderService.update(params.id, changes)
+        if (payload.target || payload.amount) {
+            const result = (await this.orderService.update(params.id, payload))
+            return result ? result : new HttpException({ error: 'no such order' }, HttpStatus.BAD_REQUEST)
         } else {
             return new HttpException({ error: 'invalid input' }, HttpStatus.BAD_REQUEST)
         }

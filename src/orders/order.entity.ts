@@ -11,7 +11,7 @@ export class OrderEntity {
   @Column()
   username: string
 
-  @Column()
+  @Column({ type: 'numeric' })
   target: number
 
   @Column()

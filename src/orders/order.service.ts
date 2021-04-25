@@ -1,35 +1,28 @@
-import { Repository } from 'typeorm'
+import { Order } from 'ccxt'
+import { Repository, Between } from 'typeorm'
+import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Injectable, HttpStatus, HttpException } from '@nestjs/common'
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
+import { Injectable, Inject, HttpStatus, HttpException } from '@nestjs/common'
+import { PRICE_CHANGE_EVENT } from '../events/price.change'
 import { OrderEntity } from './order.entity'
-import { IOrder } from './order.interface'
-
-import { PRICE_CHANGE_EVENT, IPriceChangeEvent } from '../events/price.change'
-import { Order } from 'ccxt';
+import { IOrder, IOrderRange } from './order.interface'
 
 @Injectable()
 export class OrderService {
-  constructor(
-    @InjectRepository(OrderEntity)
-    private repository: Repository<OrderEntity>,
-    private eventEmitter: EventEmitter2
-  ) {}
+  @InjectRepository(OrderEntity)
+  private repository: Repository<OrderEntity>
+
+  @Inject(ConfigService)
+  private readonly config
 
   public async create(payload: IOrder): Promise<OrderEntity> {
-    return this.repository.save({
-      // TODO: provide username from auth session
-      username: 'default',
-      ...payload
-    })
+    // TODO: provide username from auth session
+    return this.repository.save({ username: 'default', ...payload })
   }
 
-  public async update(id: number, payload: Partial<IOrder>): Promise<OrderEntity | HttpException> {
+  public async update(id: number, payload: Partial<IOrder>): Promise<OrderEntity> {
     const order = await this.repository.findOne({ id })
-
-    return order
-      ? this.repository.save({ ...order, ...payload })
-      : new HttpException({ error: 'no such order' }, HttpStatus.BAD_REQUEST)
+    return order ? this.repository.save({ ...order, ...payload }) : null
   }
 
   public delete(id: number) {
@@ -37,11 +30,12 @@ export class OrderService {
   }
 
   public async search(criteria: Partial<IOrder>): Promise<OrderEntity[]> {
-    return this.repository.find({ where: { ...criteria } });
+    return this.repository.find({ where: { ...criteria } })
   }
 
-  @OnEvent(PRICE_CHANGE_EVENT)
-  handlePairPriceChange(event: IPriceChangeEvent) {
-    //console.log(event, 'pair.price.change')
+  public async searchInRange(criteria: Partial<IOrderRange>): Promise<OrderEntity[]> {
+    const { priceFrom, priceTo, ...rest } = criteria
+    const target = Between(priceFrom, priceFrom)
+    return this.repository.find({ target, ...rest })
   }
 }

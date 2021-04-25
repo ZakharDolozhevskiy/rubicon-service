@@ -5,3 +5,8 @@ export interface IOrder {
   provider: string
   currency: string
 }
+
+export interface IOrderRange extends IOrder {
+  priceFrom: number
+  priceTo: number
+}

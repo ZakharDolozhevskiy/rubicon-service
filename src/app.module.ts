@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ServeStaticModule } from '@nestjs/serve-static'
-import { EventEmitterModule } from '@nestjs/event-emitter'
 
 import { SocketGatewayModule } from './gateway/gateway.module'
 import { KrakenModule } from './kraken/kraken.module'
@@ -13,7 +12,6 @@ import { OrderEntity } from './orders/order.entity'
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    EventEmitterModule.forRoot(),
     // dev only playground
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '../src', 'playground') }),
     // websocket interface

@@ -1,4 +1,4 @@
-import { IsString, IsPositive, IsInt, IsIn } from 'class-validator'
+import { IsString, IsPositive, IsNumber, IsIn } from 'class-validator'
 
 export class CreateOrderDto {
   @IsIn(['buy', 'sell'])
@@ -8,10 +8,10 @@ export class CreateOrderDto {
   currency: string
 
   @IsPositive()
-  @IsInt()
+  @IsNumber()
   target: number
 
   @IsPositive()
-  @IsInt()
+  @IsNumber()
   amount: number
 }
