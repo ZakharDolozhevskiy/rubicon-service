@@ -52,13 +52,8 @@ export class KrakenService {
     records.forEach(this.createOrder)
   }
 
-  private async createOrder(order: OrderEntity) {
-    return this.client.createOrder({
-      symbol: order.symbol,
-      amount: order.amount,
-      side: order.side,
-      type: 'market'
-    } as IMarketOrder)
+  public async createOrder(order: OrderEntity) {
+    return this.client.createOrder(order.symbol, order.type, order.side, order.amount, order.price)
   }
 
   private tradeBalance() {
