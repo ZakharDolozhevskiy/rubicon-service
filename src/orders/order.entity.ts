@@ -1,28 +1,35 @@
+import { IMarketOrder } from './order.interface'
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
-export class OrderEntity {
+export class OrderEntity implements IMarketOrder {
   @PrimaryGeneratedColumn()
   id: number
 
   @Column()
-  type: string
+  side: 'sell' | 'buy'
+
+  @Column({ default: 'market' })
+  type: 'market' | 'limit'
 
   @Column()
   username: string
 
   @Column({ type: 'numeric' })
-  target: number
+  price: number
 
   @Column()
   amount: number
 
   @Column()
-  currency: string
+  symbol: string
 
   @Column()
   vendor: string
 
   @Column({ default: true })
   isActive: boolean
+
+  @Column({ default: null })
+  externalId: number
 }

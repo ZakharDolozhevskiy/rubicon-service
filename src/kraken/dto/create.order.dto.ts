@@ -2,14 +2,14 @@ import { IsString, IsPositive, IsNumber, IsIn } from 'class-validator'
 
 export class CreateOrderDto {
   @IsIn(['buy', 'sell'])
-  type: string
+  side: string
 
   @IsString()
-  currency: string
+  symbol: string
 
   @IsPositive()
   @IsNumber()
-  target: number
+  price: number
 
   @IsPositive()
   @IsNumber()

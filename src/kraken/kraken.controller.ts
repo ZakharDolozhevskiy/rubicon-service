@@ -1,5 +1,6 @@
 import { Connection } from 'typeorm';
 import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, HttpStatus, HttpException } from "@nestjs/common"
+import { KrakenService } from './kraken.service'
 import { OrderService } from '../orders/order.service'
 import { KRAKEN_PAIRS, VENDOR_NAME } from './utils/constants'
 import { CreateOrderDto } from './dto/create.order.dto'
@@ -15,6 +16,14 @@ export class KrakenController {
 
     @Inject(OrderService)
     private orderService
+
+    @Inject(KrakenService)
+    private krakenService
+
+    @Get('balance')
+    async getTradeBalance(): Promise<{}> {
+        return this.krakenService.tradeBalance()
+    }
 
     @Get('pairs')
     async getPairs(): Promise<String[]> {
@@ -34,7 +43,7 @@ export class KrakenController {
 
     @Post('order')
     async create(@Body() order: CreateOrderDto) {
-        if (this.pairs.includes(order.currency)) {
+        if (this.pairs.includes(order.symbol)) {
             return this.orderService.create({ ...order, vendor })
         } else {
             return new HttpException({ error: 'invalid order currency pair' }, HttpStatus.BAD_REQUEST)
@@ -46,7 +55,7 @@ export class KrakenController {
         @Param() params: OrderParams,
         @Body() payload: UpdateOrderDto
     ) {
-        if (payload.target || payload.amount) {
+        if (payload.price || payload.amount) {
             const result = (await this.orderService.update(params.id, payload))
             return result ? result : new HttpException({ error: 'no such order' }, HttpStatus.BAD_REQUEST)
         } else {

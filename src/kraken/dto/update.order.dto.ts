@@ -9,5 +9,5 @@ export class UpdateOrderDto {
     @IsPositive()
     @IsInt()
     @IsOptional()
-    target: number
+    price: number
 }

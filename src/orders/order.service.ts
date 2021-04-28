@@ -1,6 +1,4 @@
-import { Order } from 'ccxt'
 import { Repository, Between } from 'typeorm'
-import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Injectable, Inject, HttpStatus, HttpException } from '@nestjs/common'
 import { PRICE_CHANGE_EVENT } from '../events/price.change'
@@ -11,9 +9,6 @@ import { IOrder, IOrderRange } from './order.interface'
 export class OrderService {
   @InjectRepository(OrderEntity)
   private repository: Repository<OrderEntity>
-
-  @Inject(ConfigService)
-  private readonly config
 
   public async create(payload: IOrder): Promise<OrderEntity> {
     // TODO: provide username from auth session
@@ -35,7 +30,7 @@ export class OrderService {
 
   public async searchInRange(criteria: Partial<IOrderRange>): Promise<OrderEntity[]> {
     const { priceFrom, priceTo, ...rest } = criteria
-    const target = Between(priceFrom, priceFrom)
-    return this.repository.find({ target, ...rest })
+    const price = Between(priceFrom, priceFrom)
+    return this.repository.find({ price, ...rest })
   }
 }
