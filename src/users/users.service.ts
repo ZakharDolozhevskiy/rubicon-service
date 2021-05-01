@@ -1,32 +1,33 @@
+import { Repository } from 'typeorm'
 import { Injectable } from '@nestjs/common'
-
-// This should be a real class/interface representing a user entity
-export type User = any
+import { InjectRepository } from '@nestjs/typeorm'
+import { IUser } from './users.interface'
+import { UserEntity } from './users.entity'
 
 @Injectable()
 export class UsersService {
-  private readonly users = [
-    {
-      userId: 1,
-      username: 'john',
-      password: 'changeme'
-    },
-    {
-      userId: 2,
-      username: 'maria',
-      password: 'guess'
-    }
-  ]
+  @InjectRepository(UserEntity)
+  private repository: Repository<UserEntity>
 
-  async search(username: string): Promise<User | undefined> {
-    return this.users.find((user) => user.username === username)
+  public async search(criteria: Partial<IUser>): Promise<IUser | null> {
+    return this.repository.findOne({ where: { ...criteria } })
   }
 
-  async create(): Promise<User> {}
+  public async create(params: Partial<IUser>): Promise<IUser> {
+    const user = await this.repository.findOne({ email: params.email })
 
-  async delete(): Promise<User> {}
+    if (user) {
+      // error: user already exists
+    }
 
-  async addKeys(provider: string, keys: any): Promise<any> {}
+    return this.repository.save({ ...params })
+  }
 
-  async getKeys(provider: string): Promise<any> {}
+  public async update(params: Partial<IUser>): Promise<void> {}
+
+  public async delete(): Promise<void> {}
+
+  public async addKeys(provider: string, keys: any): Promise<any> {}
+
+  public async getKeys(provider: string): Promise<any> {}
 }
