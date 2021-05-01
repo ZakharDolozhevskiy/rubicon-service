@@ -6,8 +6,10 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 
 import { SocketGatewayModule } from './gateway/gateway.module'
 import { KrakenModule } from './kraken/kraken.module'
-import { OrderModule } from './orders/order.module'
-import { OrderEntity } from './orders/order.entity'
+import { OrderModule } from './order/order.module'
+import { OrderEntity } from './order/order.entity'
+import { AuthModule } from './auth/auth.module'
+import { UsersModule } from './users/users.module'
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { OrderEntity } from './orders/order.entity'
       autoLoadEntities: true,
       synchronize: true
     }),
+    AuthModule,
+    UsersModule,
     OrderModule,
     KrakenModule.register()
   ]

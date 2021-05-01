@@ -4,7 +4,7 @@ import { KrakenController } from './kraken.controller'
 import { KrakenPublicSocket, Events } from './websocket/public'
 import { KRAKEN_CLIENT, KRAKEN_PAIRS } from './utils/constants'
 import { extractPairs } from './utils/mappers'
-import { OrderModule } from '../orders/order.module'
+import { OrderModule } from '../order/order.module'
 
 const KrakenClient = require('kraken-api')
 
@@ -15,9 +15,7 @@ export class KrakenModule {
 
     return {
       module: KrakenModule,
-      controllers: [
-        KrakenController
-      ],
+      controllers: [KrakenController],
       providers: [
         {
           provide: KRAKEN_CLIENT,
@@ -29,9 +27,7 @@ export class KrakenModule {
         },
         KrakenService
       ],
-      imports: [
-        OrderModule
-      ]
+      imports: [OrderModule]
     }
   }
 }

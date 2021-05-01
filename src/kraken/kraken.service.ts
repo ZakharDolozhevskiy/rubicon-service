@@ -1,9 +1,9 @@
 import { ConfigService } from '@nestjs/config'
 import { Injectable, Scope, Inject } from '@nestjs/common'
 
-import { OrderService } from '../orders/order.service'
-import { OrderEntity } from '../orders/order.entity'
-import { IMarketOrder } from '../orders/order.interface'
+import { OrderService } from '../order/order.service'
+import { OrderEntity } from '../order/order.entity'
+import { IMarketOrder } from '../order/order.interface'
 import { SocketGateway } from '../gateway/gateway.service'
 import { PRICE_CHANGE_EVENT } from '../events/price.change'
 
