@@ -18,4 +18,7 @@ export class UserEntity implements IUser {
 
   @Column({ default: null })
   createdAt: number
+
+  @Column({ default: null })
+  keys: string
 }

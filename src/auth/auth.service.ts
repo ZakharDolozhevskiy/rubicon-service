@@ -1,14 +1,9 @@
 import * as bcrypt from 'bcrypt'
-import { promisify } from 'util'
 import { JwtService } from '@nestjs/jwt'
-import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto'
 import { Injectable, Inject } from '@nestjs/common'
 import { NewUserDto } from './dto/new.user.dto'
 import { UsersService } from '../users/users.service'
 import { IUser } from '../users/users.interface'
-
-const saltOrRounds = 10
-const password = 'random_password'
 
 @Injectable()
 export class AuthService {
@@ -45,6 +40,7 @@ export class AuthService {
 
     if (password !== passwordRepeat) {
       // error: password mismatch
+      return
     }
 
     const user: IUser = await this.usersService.create({
@@ -53,10 +49,5 @@ export class AuthService {
     })
 
     return this.login(user)
-  }
-
-  async profile(user: { userId: string }) {
-    const { password, ...data } = await this.usersService.search({ id: user.userId })
-    return data
   }
 }
