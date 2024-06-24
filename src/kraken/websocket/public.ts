@@ -25,14 +25,14 @@ export class KrakenPublicSocket {
     [Events.book]: []
   }
 
-  private onceOpen: any
+  private isOpen: any
 
-  constructor(private pairs: string[], private token?: string) {
+  constructor(private pairs: Array<String>) {
     this.socket = new WebSocket(this.URL_DEV)
     this.socket.on('error', this.onError.bind(this))
     this.socket.on('close', this.onClose.bind(this))
     this.socket.on('message', this.onMessage.bind(this))
-    this.onceOpen = new Promise((resolve) => this.socket.on('open', resolve))
+    this.isOpen = new Promise((resolve) => this.socket.on('open', resolve))
   }
 
   private onMessage(message, ...rest) {
@@ -59,21 +59,15 @@ export class KrakenPublicSocket {
     console.info(event)
   }
 
-  private subscription(options) {
-    this.socket.send(
-      JSON.stringify({
-        event: 'subscribe',
-        pair: ['ETH/USD'], // this.pairs
-        subscription: options
-      })
-    )
+  private subscription(options, pairs) {
+    this.socket.send(JSON.stringify({ event: 'subscribe', pair: pairs, subscription: options }))
   }
 
   public subscribe(eventHandlers) {
-    this.onceOpen.then(() =>
+    this.isOpen.then(() =>
       Object.entries(eventHandlers).forEach(([event, handler]: [Events, (e: any) => void]) => {
         this.handlers[event] && this.handlers[event].push(handler)
-        this.handlers[event].length === 1 && this.subscription({ name: event })
+        this.handlers[event].length === 1 && this.subscription({ name: event }, this.pairs)
       })
     )
   }

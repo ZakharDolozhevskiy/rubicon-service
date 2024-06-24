@@ -1,47 +1,62 @@
-import { EventEmitter2 } from '@nestjs/event-emitter'
-import { Injectable, Scope } from '@nestjs/common'
-import { KrakenPublicSocket, Events } from './websocket/public'
-import { PriceChangeEvent } from '../events/currency-pairs'
+import { ConfigService } from '@nestjs/config'
+import { Injectable, Scope, Inject } from '@nestjs/common'
 
-const KrakenClient = require('kraken-api')
+import { OrderService } from '../order/order.service'
+import { OrderEntity } from '../order/order.entity'
+import { IMarketOrder } from '../order/order.interface'
+import { SocketGateway } from '../gateway/gateway.service'
+import { PRICE_CHANGE_EVENT } from '../events/price.change'
+
+import { KrakenPublicSocket, Events } from './websocket/public'
+import { KRAKEN_CLIENT, KRAKEN_PAIRS, VENDOR_NAME } from './utils/constants'
+
+const ccxt = require('ccxt')
+
 @Injectable()
 export class KrakenService {
-  private kraken: any = new KrakenClient()
-  private socket: any = null
-  private pairs: string[]
+  @Inject(KRAKEN_PAIRS)
+  private pairs
 
-  constructor(private eventEmitter: EventEmitter2) {
-    this.initialize()
-  }
+  @Inject(OrderService)
+  private orderService
 
-  async initialize() {
-    this.pairs = await this.fetchPairs()
+  @Inject(SocketGateway)
+  private socketGateway
+
+  private client = new ccxt.kraken()
+
+  private socket: KrakenPublicSocket = null
+
+  constructor(private config: ConfigService) {
     this.socket = new KrakenPublicSocket(this.pairs)
     this.socket.subscribe({ [Events.trade]: this.onPriceChange.bind(this) })
+    this.client.apiKey = this.config.get('API_KEY')
+    this.client.secret = this.config.get('API_SECRET')
   }
 
-  private async fetchPairs() {
-    const response = await this.kraken.api('AssetPairs')
-    return Object.values(response.result)
-      .map((pair: any): string => pair.wsname)
-      .filter((pair: string): boolean => !!pair)
+  private async onPriceChange(data) {
+    const price = Number(data[1][0][0])
+    const symbol = data[3]
+    const threshold = this.config.get('ORDER_TARGET_THRESHOLD')
+
+    this.socketGateway.emit(`${PRICE_CHANGE_EVENT}:${VENDOR_NAME}`, { symbol, price })
+    this.socketGateway.emit(`${PRICE_CHANGE_EVENT}:${VENDOR_NAME}:${symbol}`, { price })
+
+    const records = await this.orderService.searchInRange({
+      priceFrom: price - price * threshold,
+      priceTo: price + price * threshold,
+      vendor: VENDOR_NAME,
+      symbol
+    })
+
+    records.forEach(this.createOrder)
   }
 
-  private async getSocketToken() {
-    return {
-      token: await this.kraken.GetWebSocketsToken(),
-      expire: 15 * 60 * 1000
-    }
+  public async createOrder(order: OrderEntity) {
+    return this.client.createOrder(order.symbol, order.type, order.side, order.amount, order.price)
   }
 
-  private onPriceChange(event) {
-    this.eventEmitter.emit(
-      'pair.price.change',
-      new PriceChangeEvent({
-        pair: event[3],
-        provider: 'kraken',
-        price: Number(event[1][0][0])
-      })
-    )
+  private tradeBalance() {
+    return {}
   }
 }

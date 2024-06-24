@@ -1,0 +1,1 @@
+export const PRICE_CHANGE_EVENT = 'price.change'

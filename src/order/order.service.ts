@@ -1,13 +1,36 @@
-import { Injectable } from '@nestjs/common'
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
-import { PriceChangeEvent } from '../events/currency-pairs'
+import { Repository, Between } from 'typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Injectable, Inject, HttpStatus, HttpException } from '@nestjs/common'
+import { PRICE_CHANGE_EVENT } from '../events/price.change'
+import { OrderEntity } from './order.entity'
+import { IOrder, IOrderRange } from './order.interface'
 
 @Injectable()
 export class OrderService {
-  constructor(private eventEmitter: EventEmitter2) {}
+  @InjectRepository(OrderEntity)
+  private repository: Repository<OrderEntity>
 
-  @OnEvent('pair.price.change')
-  handlePairPriceChange(payload: PriceChangeEvent) {
-    console.log(payload, 'pair.price.change')
+  public async create(payload: IOrder): Promise<OrderEntity> {
+    // TODO: provide username from auth session
+    return this.repository.save({ username: 'default', ...payload })
+  }
+
+  public async update(id: number, payload: Partial<IOrder>): Promise<OrderEntity> {
+    const order = await this.repository.findOne({ id })
+    return order ? this.repository.save({ ...order, ...payload }) : null
+  }
+
+  public delete(id: number) {
+    return this.repository.delete({ id })
+  }
+
+  public async search(criteria: Partial<IOrder>): Promise<OrderEntity[]> {
+    return this.repository.find({ where: { ...criteria } })
+  }
+
+  public async searchInRange(criteria: Partial<IOrderRange>): Promise<OrderEntity[]> {
+    const { priceFrom, priceTo, ...rest } = criteria
+    const price = Between(priceFrom, priceFrom)
+    return this.repository.find({ price, ...rest })
   }
 }
